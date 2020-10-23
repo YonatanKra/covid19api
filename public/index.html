@@ -1,0 +1,208 @@
+<html>
+<head>
+    <link rel="stylesheet"
+          href="https://use.fontawesome.com/releases/v5.7.2/css/all.css">
+
+    <link rel="stylesheet" data-name="vs/editor/editor.main"
+          href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.20.0/min/vs/editor/editor.main.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.20.0/min/vs/loader.min.js"></script>
+
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+          integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+            integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs=" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+
+    <style>
+        .white {
+            background-color: #fdfdfe;
+        }
+        .gray {
+            background-color: #d6d8db;
+        }
+        .dark {
+            background-color: #28a745;
+            color: #fdfdfe;
+        }
+        pre {
+            white-space: pre-wrap;
+            color: red;
+            font-size: 16px;
+        }
+        #output {
+            font-size: 1.5em;
+        }
+        .hidden {
+            display: none;
+        }
+        img {
+            max-height: 500px;
+        }
+        .animated {
+            -webkit-animation: rotateY 1s 1 linear;
+            animation: rotateY 1s 1 linear;
+            animation-iteration-count: 1;
+        }
+        @-webkit-keyframes rotateY {
+            to { -webkit-transform: rotateY(180deg); }
+        }
+        @keyframes rotateY {
+            to { transform: rotateY(180deg); }
+        }
+
+        .revealOnScroll img{
+            height: 180px;
+            width: auto;
+        }
+
+        .logo-text img{
+            height: auto;
+            width: 260px;
+            margin-right: 3px;
+            margin-top: 20px;
+        }
+
+        .list-group-item {
+            background-color: transparent !important;
+        }
+    </style>
+</head>
+<body>
+<div id="demo-intro" class="text-center container-fluid">
+    <div class="row">
+        <div class="col-sm">
+        <div class="revealOnScroll animated"><img src="https://askql.org/images/askQL-icon.svg"></div>
+        <div class="logo-text"><img src="https://askql.org/images/askQL-text-dark.svg"></div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm">
+        <div class="mt-4 relative">
+            <a href="https://github.com/xFAANG/askql" target="_blank" rel="noopener"
+                                      class="btn btn-sm github-stars btn-outline-secondary hvr-sweep-to-right relative"><i
+                class="fab fa-github mr-2" aria-hidden="true"></i>Star on GitHub
+            <div class="github-stars-counter justify-content-start align-items-center d-none">
+                <div class="arrow-left"></div>
+                <span class="tooltip-inner"><span class="stars-number">332</span></span></div>
+        </a></div>
+            <!-- /star button -->
+            <br/>
+        <button onclick="startDemo()"
+                id="startDemoButton"
+                class="btn btn-primary"
+                type="button">Start Demo</button>
+        </div>
+    </div>
+</div>
+<script>
+    function startDemo() {
+        const intro = document.getElementById('demo-intro');
+        const demo = document.getElementById('demo');
+
+        intro.style.display = 'none';
+        demo.style.display = 'inline';
+        setEditor();
+    }
+</script>
+<div id="demo" class="hidden container-fluid">
+    <div class="row">
+        <div class="col-sm">
+            <div class="p-3">
+                <div style="min-height: 500px;" id="editor"></div>
+            </div>
+
+            <div class="p-3">
+                <button style="width: 100%;"
+                        id="submitButton"
+                        class="btn btn-primary"
+                        type="button">Submit</button>
+            </div>
+        </div>
+        <div class="col-sm">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light"><h2 class="mx-auto">Results</h2></nav>
+            <div id="output"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function setEditor() {
+        require.config({paths: {'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.20.0/min/vs'}});
+        window.MonacoEnvironment = {getWorkerUrl: () => proxy};
+        let proxy = URL.createObjectURL(new Blob([`
+    self.MonacoEnvironment = {
+        baseUrl: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.20.0/min'
+    };
+    importScripts('https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.20.0/min/vs/base/worker/workerMain.min.js');
+`], {type: 'text/javascript'}));
+        require(["vs/editor/editor.main"], function () {
+            let editor = monaco.editor.create(document.getElementById('editor'), {
+                value: `function x() {
+  console.log("Hello world!");
+}`,
+                language: 'javascript',
+                theme: 'vs-dark'
+            });
+            editor.setValue(`ask { 'Hello World!' } `);
+            setSubmit(editor);
+        });
+    }
+</script>
+
+<script>
+    function dataToList(data = [], odd) {
+        const wrappers = {
+            prefix: '<li class="list-group-item">',
+            suffix: '</li>'
+        };
+        if (!Array.isArray(data)) {
+            if (typeof data !== 'object') {
+                return `<span class="badge">${data}</span>`;
+            }
+            data = Object.keys(data).map((key) => {
+                return `<span class="badge badge-info">${key.toUpperCase()}</span>${dataToList(data[key])}`
+            })
+        }
+        const color = odd === undefined ? 'gray' : odd ? 'white' : 'dark';
+        return data.reduce((prevVal, nextVal, index) => {
+            return `
+                ${prevVal}
+                ${wrappers.prefix}
+                ${dataToList(nextVal, index % 2)}
+                ${wrappers.suffix}
+            `;
+        }, `<ul class="list-group ${color}">`) + '</ul>';
+    }
+
+    function printOut(data = []) {
+        const output = document.getElementById('output');
+        output.innerHTML = dataToList(data);
+    }
+
+    function setSubmit(editor) {
+        const button = document.getElementById('submitButton');
+        button.addEventListener('click', () => submit(editor));
+    }
+
+    function submit(editor) {
+        const askCode = editor.getValue();
+        const output = document.getElementById('output');
+        console.log(JSON.stringify({query: askCode}));
+        fetch('http://localhost:8081/graphql', {
+            method: 'post',
+            body: JSON.stringify({query: askCode}),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(function (response) {
+            return response.json();
+        }).then(function (data) {
+            if (typeof data === 'string') return output.innerHTML = `<pre>${data}</pre>`
+            printOut(data);
+        });
+    }
+</script>
+</body>
+</html>

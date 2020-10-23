@@ -4,6 +4,8 @@ const schema = require('./schema');
 
 const app = express();
 
+app.use(express.static('public'));
+
 app.use(
   '/graphql',
   graphqlHTTP({
@@ -12,4 +14,4 @@ app.use(
   }),
 );
 
-app.listen(8080);
+app.listen(8081);
